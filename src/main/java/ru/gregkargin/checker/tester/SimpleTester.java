@@ -1,21 +1,15 @@
 package ru.gregkargin.checker.tester;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class SimpleTester implements Tester {
     public static final String TEST_SEPARATOR = "input_ends";
-
-    private String assembleExecCommand(Path pathToExecutable, Path pathToTest) {
-        return new StringBuilder()
-                .append(pathToExecutable.toString())
-                .append(" < ")
-                .append(pathToTest)
-                .toString();
-    }
 
     private boolean checkTest(BufferedReader stdInput, BufferedReader testInput) throws IOException {
         String testLine = "";
@@ -40,10 +34,12 @@ public class SimpleTester implements Tester {
 
     @Override
     public boolean test(Path pathToExecutable, Path pathToTest) throws TesterException {
-        Runtime testerRuntime = Runtime.getRuntime();
         Process testingProcess;
         try {
-            testingProcess = testerRuntime.exec(assembleExecCommand(pathToExecutable, pathToTest));
+            testingProcess = new ProcessBuilder()
+                    .command(pathToExecutable.toString())
+                    .redirectInput(pathToTest.toFile())
+                    .start();
         } catch (IOException e) {
             throw new TesterException("Could not run executable", e);
         }

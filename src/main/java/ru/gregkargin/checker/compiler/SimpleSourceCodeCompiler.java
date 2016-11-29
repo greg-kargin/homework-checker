@@ -8,27 +8,21 @@ import java.nio.file.Paths;
 
 public class SimpleSourceCodeCompiler implements SourceCodeCompiler {
 
-    private String assembleExecCommand(Path pathToSourceCode, SupportedProgrammingLanguage programmingLanguage)
+    private String[] getCommand(Path pathToSourceCode, SupportedProgrammingLanguage programmingLanguage)
             throws SupportedProgrammingLanguageException {
         switch (programmingLanguage) {
-            case CPP: case CPP11:
-            return new StringBuilder()
-                    .append(programmingLanguage.getCompilerCall())
-                    .append(" ")
-                    .append(pathToSourceCode.toString())
-                    .append(" -o ")
-                    .append(pathToSourceCode.getParent() == null ? "" : pathToSourceCode.getParent() + "/")
-                    .append("a.out")
-                    .toString();
+            case CPP:
+                return new String[] {
+                     "clang++", pathToSourceCode.toString(), "-o",
+                     pathToSourceCode.getParent() == null ? "a.out" : pathToSourceCode.getParent() + "/a.out"
+                };
 
-//            case JAVA:
-//                return new StringBuilder()
-//                        .append(programmingLanguage.getCompilerCall())
-//                        .append(" ")
-//                        .append(pathToSourceCode.toString())
-//                        .append(" -d ")
-//                        .append(pathToSourceCode.getParent() == null ? "" : pathToSourceCode.getParent())
-//                        .toString();
+            case CPP11:
+                return new String[] {
+                        "clang++", "-std=c++11", "-lib=libc++", pathToSourceCode.toString(), "-o",
+                        pathToSourceCode.getParent() == null ? "a.out" : pathToSourceCode.getParent() + "/a.out"
+                };
+
             default:
                 throw new SupportedProgrammingLanguageException("Unknown programming language");
         }
@@ -36,10 +30,11 @@ public class SimpleSourceCodeCompiler implements SourceCodeCompiler {
 
     @Override
     public Path compile(Path pathToSourceCode, SupportedProgrammingLanguage programmingLanguage) throws CompilerException {
-        Runtime compilerRuntime = Runtime.getRuntime();
-        Process compilationProcess = null;
+        Process compilationProcess;
         try {
-            compilationProcess = compilerRuntime.exec(assembleExecCommand(pathToSourceCode, programmingLanguage));
+            compilationProcess = new ProcessBuilder()
+                    .command(getCommand(pathToSourceCode, programmingLanguage))
+                    .start();
         } catch (Exception e) {
             throw new CompilerException("Could not execute:", e);
         }
