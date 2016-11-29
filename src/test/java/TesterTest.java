@@ -28,6 +28,18 @@ public class TesterTest {
             .append("\nabcd")
             .toString();
 
+    static final String INPUT_OUTPUT_SOURCE = new StringBuilder()
+            .append("#include <iostream> \n")
+            .append("int main(){\n")
+            .append("\t std::cout << \"abcd\";")
+            .append("}")
+            .toString();
+
+    static final String INPUT_OUTPUT_TESTFILE = new StringBuilder()
+            .append(SimpleTester.TEST_SEPARATOR)
+            .append("\nabcd")
+            .toString();
+
     static final String NO_INPUT_NO_OUTPUT_SOURCE = new StringBuilder()
             .append("int main(){\n")
             .append("}")
@@ -92,5 +104,24 @@ public class TesterTest {
 
         Tester tester = new SimpleTester();
         assertFalse(tester.test(executablePath, testPath));
+    }
+
+    @Test
+    public void InputOutputTest() throws IOException, CompilerException, TesterException {
+        sourcePath = Paths.get("TesterTestDir/INPUT_OUTPUT.cpp");
+        testPath = Paths.get("TesterTestDir/INPUT_OUTPUT.in");
+
+        if (!Files.exists(sourcePath.getParent())) {
+            Files.createDirectories(sourcePath.getParent());
+        }
+
+        Files.write(Paths.get("TesterTestDir/INPUT_OUTPUT.cpp"), INPUT_OUTPUT_SOURCE.getBytes());
+        Files.write(Paths.get("TesterTestDir/INPUT_OUTPUT.in"), INPUT_OUTPUT_TESTFILE.getBytes());
+
+        SourceCodeCompiler codeCompiler = new SimpleSourceCodeCompiler();
+        executablePath = codeCompiler.compile(sourcePath, SupportedProgrammingLanguage.CPP);
+
+        Tester tester = new SimpleTester();
+        assertTrue(tester.test(executablePath, testPath));
     }
 }
