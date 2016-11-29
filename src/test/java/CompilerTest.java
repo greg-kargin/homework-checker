@@ -1,3 +1,5 @@
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import ru.gregkargin.checker.compiler.CompilerException;
@@ -37,67 +39,64 @@ public class CompilerTest {
             .append("}")
             .toString();
 
+    private Path sourcePath, executablePath;
+
+    @Before
+    public void initPath() {
+        sourcePath = null;
+        executablePath = null;
+    }
+
+    @After
+    public void deleteFiles() throws IOException {
+        Files.deleteIfExists(sourcePath);
+        Files.deleteIfExists(executablePath);
+        Files.deleteIfExists(executablePath);
+        for (Path parent = sourcePath.getParent(); parent != null; parent = parent.getParent()) {
+            Files.deleteIfExists(parent);
+        }
+    }
+
     @Test
     public void testDefaultPathAndCPP() throws IOException, CompilerException{
-        Path defaultPath = Paths.get("default.cpp");
-        Path expectedOutputPath = Paths.get("a.out");
-        Files.write(defaultPath, CPP_SOURCE.getBytes());
+        sourcePath = Paths.get("default.cpp");
+        executablePath = Paths.get("a.out");
+        Files.write(sourcePath, CPP_SOURCE.getBytes());
         SourceCodeCompiler compiler = new SimpleSourceCodeCompiler();
-        compiler.compile(defaultPath, SupportedProgrammingLanguage.CPP);
-        try {
-            if (!Files.exists(expectedOutputPath)) {
-                throw new Exception("a.out was not created");
-            }
-        } catch (Exception e) {
-            Files.delete(defaultPath);
-            throw new CompilerException("", e);
+        compiler.compile(sourcePath, SupportedProgrammingLanguage.CPP);
+        if (!Files.exists(executablePath)) {
+            throw new CompilerException("a.out was not created");
         }
-        Files.delete(defaultPath);
-        Files.delete(expectedOutputPath);
     }
 
     @Test
     public void testSimplePathAndCPP11() throws IOException, CompilerException {
-        Path userPath = Paths.get("username/users_attempt.cpp");
-        Path expectedOutputPath = Paths.get("username/a.out");
-        if (!Files.exists(userPath.getParent())) {
-            Files.createDirectories(userPath.getParent());
+        sourcePath = Paths.get("username/users_attempt.cpp");
+        executablePath = Paths.get("username/a.out");
+        if (!Files.exists(sourcePath.getParent())) {
+            Files.createDirectories(sourcePath.getParent());
         }
-        Files.write(userPath, CPP11_SOURCE.getBytes());
+        Files.write(sourcePath, CPP11_SOURCE.getBytes());
         SourceCodeCompiler compiler = new SimpleSourceCodeCompiler();
-        compiler.compile(userPath, SupportedProgrammingLanguage.CPP11);
-        try {
-            if (!Files.exists(expectedOutputPath)) {
-                throw new Exception("a.out was not created");
-            }
-        } catch (Exception e) {
-            Files.delete(userPath);
-            throw new CompilerException("", e);
+        compiler.compile(sourcePath, SupportedProgrammingLanguage.CPP11);
+        if (!Files.exists(executablePath)) {
+            throw new CompilerException("a.out was not created");
         }
-        Files.delete(userPath);
-        Files.delete(expectedOutputPath);
     }
 
     @Test
     public void testLongPath() throws IOException, CompilerException {
-        Path userPath = Paths.get("a/b/c/d/e/f/users_attempt.cpp");
-        Path expectedOutputPath = Paths.get("a/b/c/d/e/f/a.out");
-        if (!Files.exists(userPath.getParent())) {
-            Files.createDirectories(userPath.getParent());
+        sourcePath = Paths.get("a/b/c/d/e/f/users_attempt.cpp");
+        executablePath = Paths.get("a/b/c/d/e/f/a.out");
+        if (!Files.exists(sourcePath.getParent())) {
+            Files.createDirectories(sourcePath.getParent());
         }
-        Files.write(userPath, CPP11_SOURCE.getBytes());
+        Files.write(sourcePath, CPP11_SOURCE.getBytes());
         SourceCodeCompiler compiler = new SimpleSourceCodeCompiler();
-        compiler.compile(userPath, SupportedProgrammingLanguage.CPP11);
-        try {
-            if (!Files.exists(expectedOutputPath)) {
-                throw new Exception("a.out was not created");
-            }
-        } catch (Exception e) {
-            Files.delete(userPath);
-            throw new CompilerException("", e);
+        compiler.compile(sourcePath, SupportedProgrammingLanguage.CPP11);
+        if (!Files.exists(executablePath)) {
+            throw new CompilerException("a.out was not created");
         }
-        Files.delete(userPath);
-        Files.delete(expectedOutputPath);
     }
 
     /*
