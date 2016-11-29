@@ -23,10 +23,13 @@ public class SimpleTester implements Tester {
             testLine = testInput.readLine();
         }
 
-        String inputLine = "";
-        testLine = "";
-        while(testLine != null && inputLine != null && testInput != null) {
-            if(!testLine.trim().equals(inputLine.trim())) {
+        testLine = testInput.readLine();
+        String inputLine = stdInput.readLine();
+        while (testLine != null) {
+            if (inputLine == null) {
+                return false;
+            }
+            if (!testLine.trim().equals(inputLine.trim())) {
                 return false;
             }
             testLine = testInput.readLine();
